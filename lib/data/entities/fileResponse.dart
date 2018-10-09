@@ -82,12 +82,16 @@ class Element extends Object {
   final String type;
   final String name;
   final AbsoluteBoundingBox absoluteBoundingBox;
+  final String transitionNodeID;
+  final List<Element> children;
 
   Element(
       this.id,
       this.name,
       this.type,
       this.absoluteBoundingBox,
+      this.transitionNodeID,
+      this.children,
   );
 
   factory Element.fromJson(Map<String, dynamic> json) => _$ElementFromJson(json);

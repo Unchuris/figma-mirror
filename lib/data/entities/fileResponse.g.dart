@@ -92,14 +92,21 @@ Element _$ElementFromJson(Map<String, dynamic> json) {
       json['absoluteBoundingBox'] == null
           ? null
           : AbsoluteBoundingBox.fromJson(
-              json['absoluteBoundingBox'] as Map<String, dynamic>));
+              json['absoluteBoundingBox'] as Map<String, dynamic>),
+      json['transitionNodeID'] as String,
+      (json['children'] as List)
+          ?.map((e) =>
+              e == null ? null : Element.fromJson(e as Map<String, dynamic>))
+          ?.toList());
 }
 
 Map<String, dynamic> _$ElementToJson(Element instance) => <String, dynamic>{
       'id': instance.id,
       'type': instance.type,
       'name': instance.name,
-      'absoluteBoundingBox': instance.absoluteBoundingBox
+      'absoluteBoundingBox': instance.absoluteBoundingBox,
+      'transitionNodeID': instance.transitionNodeID,
+      'children': instance.children
     };
 
 AbsoluteBoundingBox _$AbsoluteBoundingBoxFromJson(Map<String, dynamic> json) {

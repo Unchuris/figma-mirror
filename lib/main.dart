@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:figma_mirror/data/entities/fileResponse.dart';
 import 'package:figma_mirror/figmaAPI.dart';
+import 'package:figma_mirror/pages.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 
@@ -48,6 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
     try {
       _initializeApi();
       FileResponse baseJson = await _getFileResponse();
+      _exportAllFigmaPages(baseJson);
       final imageID = _getBaseImageIDFromBaseJson(baseJson);
       dynamic responseImageAsJson = await _getImageResponseByID(imageID);
       final imgUrl = _getImageUrlFromJsonByID(responseImageAsJson, imageID);
@@ -91,6 +93,11 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
             textUntilTheScreenIsLoaded = "Load Failed.\n" + e.message;
         });
+  }
+
+  _exportAllFigmaPages(FileResponse fileResponse) {
+    FigmaPage figmaPage = FigmaPage(fileResponse);
+    figmaPage.exportAllPages();
   }
 
   @override
