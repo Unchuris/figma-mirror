@@ -8,7 +8,7 @@ class FigmaPage {
   FileResponse _baseJson;
   List<ActiveElement> activeElements;
 
-  final HashMap<String, List<ActiveElement>> map = new HashMap();
+  final HashMap<String, List<ActiveElement>> _map = new HashMap();
 
   FigmaPage(FileResponse fileResponse) {
     _baseJson = fileResponse;
@@ -17,7 +17,7 @@ class FigmaPage {
   exportAllPages() {
     for (var data in _baseJson.document.children.elementAt(0).children) {
       if(data.id != null) {
-        map.putIfAbsent(data.id, () => new List<ActiveElement>());
+        _map.putIfAbsent(data.id, () => new List<ActiveElement>());
         _addAllActiveChildrenToTheMap(data);
       } 
     }
@@ -46,9 +46,13 @@ class FigmaPage {
           c.absoluteBoundingBox.height, 
           c.transitionNodeID, 
           "");
-        map[id].add(activeElement);
+        _map[id].add(activeElement);
       }
     }
+  }
+
+  List<ActiveElement> getActiveElements(String pageID) {
+    return _map[pageID] == null ? new List() : _map[pageID];
   }
 
 }

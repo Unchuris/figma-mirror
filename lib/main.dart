@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:figma_mirror/activeElement.dart';
 import 'package:figma_mirror/data/entities/fileResponse.dart';
 import 'package:figma_mirror/figmaAPI.dart';
 import 'package:figma_mirror/pages.dart';
@@ -38,7 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final String authToken = "4077-7d63db95-dfc0-4f87-b546-d280ba9d5337";
   final String fileKey = "FVz0TcUD7ZwMAg6vz7D17l";
   var api;
-  String imageUrl;
+  String imageUrl, pageID;
   String textUntilTheScreenIsLoaded = 'Loading...';
 
   _MyHomePageState() {
@@ -50,13 +51,18 @@ class _MyHomePageState extends State<MyHomePage> {
       _initializeApi();
       FileResponse baseJson = await _getFileResponse();
       _exportAllFigmaPages(baseJson);
-      final imageID = _getBaseImageIDFromBaseJson(baseJson);
-      dynamic responseImageAsJson = await _getImageResponseByID(imageID);
-      final imgUrl = _getImageUrlFromJsonByID(responseImageAsJson, imageID);
-      _drawImage(imgUrl);
+      String pageID = _getBaseImageIDFromBaseJson(baseJson);
+      _initElementsOnPage(pageID);
     } on Exception catch(e) {
       _loadError(e);
     }
+  }
+
+  _initElementsOnPage(String pageID) async  {
+    this.pageID = pageID;
+    dynamic responseImageAsJson = await _getImageResponseByID(pageID);
+    final imgUrl = _getImageUrlFromJsonByID(responseImageAsJson, pageID);
+    _drawImage(imgUrl);
   }
 
   _initializeApi() {
@@ -95,22 +101,60 @@ class _MyHomePageState extends State<MyHomePage> {
         });
   }
 
+  FigmaPage figmaPage;
   _exportAllFigmaPages(FileResponse fileResponse) {
-    FigmaPage figmaPage = FigmaPage(fileResponse);
+    figmaPage = FigmaPage(fileResponse);
     figmaPage.exportAllPages();
   }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      body: Center(
-        child: imageUrl == null
-            ? Text(textUntilTheScreenIsLoaded)
-            : CachedNetworkImage(
-                placeholder: CircularProgressIndicator(),
-                imageUrl: imageUrl
-            ),
+      body: Stack(
+        children: _drawElements(),
       ),
     );
   }
+
+  _drawElements() {
+     var activeElement = <Widget>[new Center(
+         child: imageUrl == null
+          ? Text(textUntilTheScreenIsLoaded)
+          : CachedNetworkImage(
+            placeholder: CircularProgressIndicator(),
+            imageUrl: imageUrl
+          )
+        )];
+     if (pageID == null) return activeElement;
+     figmaPage.getActiveElements(pageID).forEach( (item) => 
+        activeElement.add(new Positioned(
+            left: 65.0,
+            top: item.y,
+            child: new GestureDetector(
+              onTap: () {
+                _updateScreen(item.link);
+              },
+              child: new Container(
+                width: item.width,
+                height: item.height,
+                decoration: new BoxDecoration(color: Colors.green),
+              )
+            ),
+          ))
+      );
+
+    return activeElement;
+  }
+
+  _updateScreen(String id) {
+    try {
+      setState(() {
+          this.imageUrl = null;
+        });
+      _initElementsOnPage(id);
+    } on Exception catch(e) {
+      _loadError(e);
+    }
+  }
+
 }
