@@ -1,20 +1,49 @@
+import 'dart:async';
 import 'dart:collection';
 
-import 'package:figma_mirror/activeElement.dart';
+import 'package:figma_mirror/data/datasource/remote/figma_api.dart';
+import 'package:figma_mirror/data/entities/active_element.dart';
 import 'package:figma_mirror/data/entities/fileResponse.dart';
+import 'package:figma_mirror/data/repositories/auth_repository.dart';
+import 'package:figma_mirror/data/repositories/screen_data.dart';
 
+class FigmaRepository implements ScreenRepository {
 
-class FigmaPage {
+  FigmaAPI _figmaApi;
+
+  AuthRepository _authRepository;
+
   FileResponse _baseJson;
-  List<ActiveElement> activeElements;
 
   final HashMap<String, List<ActiveElement>> _map = new HashMap();
 
-  FigmaPage(FileResponse fileResponse) {
-    _baseJson = fileResponse;
+  FigmaRepository(this._figmaApi, this._authRepository);
+
+  Future<FileResponse> fetchFile() async {
+    return await _figmaApi.fetchFile(
+      _authRepository.getToken(), 
+      _authRepository.getFileKey()
+    ).then((value) {
+      _baseJson = value;
+      return _baseJson;
+    });
   }
 
-  exportAllPages() {
+  Future<String> fetchImageURL(String id) {
+    return _figmaApi.fetchImageURL(
+      _authRepository.getToken(), 
+      _authRepository.getFileKey(),
+      id);
+  }
+
+  List<ActiveElement> getActiveElements(String pageID) {
+    return _map[pageID] == null ? new List() : _map[pageID];
+  }
+
+  exportAllPages() async {
+    if (_baseJson == null) {
+      _baseJson = await fetchFile();
+    }
     for (var data in _baseJson.document.children.elementAt(0).children) {
       if(data.id != null) {
         _map.putIfAbsent(data.id, () => new List<ActiveElement>());
@@ -49,10 +78,6 @@ class FigmaPage {
         _map[id].add(activeElement);
       }
     }
-  }
-
-  List<ActiveElement> getActiveElements(String pageID) {
-    return _map[pageID] == null ? new List() : _map[pageID];
   }
 
 }
