@@ -31,9 +31,9 @@ class ImagePage extends StatefulWidget {
 
   List<ActiveElement> _activeElement = new List();
 
-  String textUntilTheScreenIsLoaded = 'Loading...';
+  String textUntilTheScreenIsLoaded;
 
-  bool _isLoading;
+  bool _isLoading, _isError;
 
   _ImagePageState() {
     _presenter = new ImageListPresenter(this);
@@ -43,6 +43,7 @@ class ImagePage extends StatefulWidget {
   void initState() {
     super.initState();
     _isLoading = true;
+    _isError = false;
     _presenter.loadScreen(null);
   }
 
@@ -58,6 +59,7 @@ class ImagePage extends StatefulWidget {
   @override
   void onLoadError(String e) {
     setState(() {
+      _isError = true;
       textUntilTheScreenIsLoaded = "Load Failed.\n" + e;
     });
   }
@@ -67,42 +69,57 @@ class ImagePage extends StatefulWidget {
 
     var widget;
 
-    if(_isLoading){
+    if(_isLoading) {
       widget = new Center(
-        child: new Text(textUntilTheScreenIsLoaded)
+        child: _isError 
+          ? Text(textUntilTheScreenIsLoaded)
+          : CircularProgressIndicator()
       );
     } else {
       widget = new Scaffold(
-        body: Stack(
-          children: _drawElements(),
-        ),
-      );
+        body: new Container (
+          decoration: new BoxDecoration(
+            image: new DecorationImage(
+                image: new CachedNetworkImageProvider(_imageUrl),
+                fit: BoxFit.fill
+              )
+            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) =>
+              new Stack(
+                children: _drawElements(constraints)
+              ),
+          ),
+      ));
     }
 
     return widget;
   }
 
-  List<Widget> _drawElements() {
+  List<Widget> _drawElements(BoxConstraints constraints) {
 
-    var activeElement = <Widget>[new Center(
-      child: CachedNetworkImage(
-        placeholder: CircularProgressIndicator(),
-        imageUrl: _imageUrl,
-      )
-    )];
+    var activeElement = <Widget>[];
 
+    if (_activeElement.isEmpty) return activeElement;
+
+    double imageHeigth = _activeElement[0].parent.height;
+    double imageWidth = _activeElement[0].parent.width;
+
+    double heightFactor = constraints.maxHeight / imageHeigth;
+    double widthFactor = constraints.maxWidth / imageWidth;
+    
     _activeElement.forEach( (item) => 
       activeElement.add(new Positioned(
-        left: 65.0,
-        top: item.y,
+        left: (item.x - item.parent.x).abs() * widthFactor,
+        top: (item.y - item.parent.y).abs() * heightFactor,
         child: new GestureDetector(
           onTap: () {
-            _updateScreen(item.link);
+            _updateScreen(item.linkToNewImage);
           },
           child: new Container(
-            width: item.width,
-            height: item.height,
-            decoration: new BoxDecoration(color: Colors.green),
+            width: item.width * widthFactor,
+            height: item.height * heightFactor,
+            decoration: new BoxDecoration(color: Colors.transparent),
           )
         ),
       ))

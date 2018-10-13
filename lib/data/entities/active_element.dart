@@ -1,19 +1,21 @@
+import 'package:figma_mirror/data/entities/image.dart';
+
 class ActiveElement {
 
   final double x;
   final double y;
   final double width;
   final double height;
-  final String link;
-  final String href;
+  final String linkToNewImage;
+  final MyImage parent;
 
   ActiveElement(
       this.x,
       this.y,
       this.width,
       this.height,
-      this.link,
-      this.href,
+      this.linkToNewImage,
+      this.parent,
   );
   
 }

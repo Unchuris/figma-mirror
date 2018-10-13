@@ -73,7 +73,11 @@ Frame _$FrameFromJson(Map<String, dynamic> json) {
       (json['children'] as List)
           ?.map((e) =>
               e == null ? null : Element.fromJson(e as Map<String, dynamic>))
-          ?.toList());
+          ?.toList(),
+      json['absoluteBoundingBox'] == null
+          ? null
+          : AbsoluteBoundingBox.fromJson(
+              json['absoluteBoundingBox'] as Map<String, dynamic>));
 }
 
 Map<String, dynamic> _$FrameToJson(Frame instance) => <String, dynamic>{
@@ -81,7 +85,8 @@ Map<String, dynamic> _$FrameToJson(Frame instance) => <String, dynamic>{
       'name': instance.name,
       'type': instance.type,
       'blendMode': instance.blendMode,
-      'children': instance.children
+      'children': instance.children,
+      'absoluteBoundingBox': instance.absoluteBoundingBox
     };
 
 Element _$ElementFromJson(Map<String, dynamic> json) {

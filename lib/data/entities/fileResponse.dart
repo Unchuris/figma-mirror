@@ -64,6 +64,7 @@ class Frame extends Object {
   final String type;
   final String blendMode;
   final List<Element> children;
+  final AbsoluteBoundingBox absoluteBoundingBox;
 
   Frame(
       this.id,
@@ -71,6 +72,7 @@ class Frame extends Object {
       this.type,
       this.blendMode,
       this.children,
+      this.absoluteBoundingBox,
   );
 
   factory Frame.fromJson(Map<String, dynamic> json) => _$FrameFromJson(json);
