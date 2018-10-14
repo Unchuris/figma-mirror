@@ -24,7 +24,7 @@ class FigmaAPI {
         ));
   }
   
-  Future<String> fetchImageURL(String authToken, String fileKey, String id) async {
+  Future<String> fetchImageUrl(String authToken, String fileKey, String id) async {
     
     String url = "$_baseURL/images/$fileKey?ids=$id&scale=$scale}";
 
@@ -43,7 +43,7 @@ class FigmaAPI {
         final statusCode = response.statusCode;
       
         if (jsonBody == null || statusCode > 200) {
-          throw new FetchDataException('HTTP request failed, statusCode: ${response?.statusCode}');
+          throw FetchDataException('HTTP request failed, statusCode: ${response?.statusCode}');
         }
 
         return jsonBody;

@@ -113,11 +113,11 @@ class ImagePage extends StatefulWidget {
 
     if (_activeElement.isNotEmpty) {
 
-      double imageHeigth = _activeElement[0].parent.height;
-      double imageWidth = _activeElement[0].parent.width;
+      double frameHeigth = _activeElement[0].parent.absoluteBoundingBox.height;
+      double frameWidth = _activeElement[0].parent.absoluteBoundingBox.width;
 
       size = _getContainSize(
-        Size(imageWidth, imageHeigth),
+        Size(frameWidth, frameHeigth),
         Size(constraints.maxWidth, constraints.maxHeight)
       );
     }
@@ -143,19 +143,19 @@ class ImagePage extends StatefulWidget {
 
     if (_activeElement.isEmpty) return activeElement;
 
-    double imageHeigth = _activeElement[0].parent.height;
-    double imageWidth = _activeElement[0].parent.width;
+    double frameHeigth = _activeElement[0].parent.absoluteBoundingBox.height;
+    double frameWidth = _activeElement[0].parent.absoluteBoundingBox.width;
 
-    double heightFactor = constraints.maxHeight / imageHeigth;
-    double widthFactor = constraints.maxWidth / imageWidth;
+    double heightFactor = constraints.maxHeight / frameHeigth;
+    double widthFactor = constraints.maxWidth / frameWidth;
     
     _activeElement.forEach( (item) => 
       activeElement.add(Positioned(
-        left: (item.x - item.parent.x).abs() * widthFactor,
-        top: (item.y - item.parent.y).abs() * heightFactor,
+        left: (item.x - item.parent.absoluteBoundingBox.x).abs() * widthFactor,
+        top: (item.y - item.parent.absoluteBoundingBox.y).abs() * heightFactor,
         child: GestureDetector(
           onTap: () {
-            _updateScreen(item.linkToNewImage);
+            _updateScreen(item.linkToNewFrame);
           },
           child: Container(
             width: item.width * widthFactor,
@@ -170,13 +170,13 @@ class ImagePage extends StatefulWidget {
     return activeElement;
   }
 
-  _updateScreen(String imageId) {
+  _updateScreen(String frameId) {
 
     setState(() {
       _isLoading = true;
     });
 
-    _presenter.loadScreen(imageId);
+    _presenter.loadScreen(frameId);
   }
 
  }

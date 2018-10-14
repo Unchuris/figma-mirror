@@ -10,7 +10,7 @@ enum Flavor {
 }
 
 class Injector {
-  static final Injector _singleton = new Injector._internal();
+  static final Injector _singleton = Injector._internal();
   static Flavor _flavor;
 
   static void configure(Flavor flavor) {
@@ -24,7 +24,7 @@ class Injector {
   Injector._internal();
 
   ScreenRepository get screenRepository {
-    return new FigmaRepository(FigmaAPI(Client()), AuthRepository());
+    return FigmaRepository(FigmaAPI(Client()), AuthRepository());
   }
 
 }

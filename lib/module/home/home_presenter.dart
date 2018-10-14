@@ -7,7 +7,7 @@ import 'package:figma_mirror/data/repositories/screen_data.dart';
 import '../../injection/di.dart';
 
 abstract class ScreenListViewContract {
-  void onLoadScreenComplete(String imageUrl, List<ActiveElement> items);
+  void onLoadScreenComplete(String frameUrl, List<ActiveElement> items);
   void onLoadError(String error);
 }
 
@@ -17,28 +17,28 @@ class ImageListPresenter {
   FileResponse _baseJson;
 
   ImageListPresenter(this._view)  {
-    _repository = new Injector().screenRepository;
+    _repository = Injector().screenRepository;
   }
 
-  loadScreen(String imageId) async {
+  loadScreen(String frameId) async {
     try {
       if (_baseJson == null) {
-        await _loadFileAndExportPages();
+        await _loadFileAndExportFrames();
       }
-      if (imageId == null) {
-        imageId = _getBaseImageIDFromBaseJson();
+      if (frameId == null) {
+        frameId = _getBaseFrameIdFromBaseJson();
       }
-      String _imageUrl = await _loadImageURL(imageId);
-      List<ActiveElement> _items = _loadActiveElements(imageId);
-      _view.onLoadScreenComplete(_imageUrl, _items);
+      String _frameUrl = await _loadFrameUrl(frameId);
+      List<ActiveElement> _items = _loadActiveElements(frameId);
+      _view.onLoadScreenComplete(_frameUrl, _items);
     } on FetchDataException catch(e) {
       _view.onLoadError(e.toString());
     }
   }
 
-  _loadFileAndExportPages() async {
+  _loadFileAndExportFrames() async {
     await _loadFile();
-    _exportAllPages();
+    _exportAllFrames();
   }
 
   _loadFile() async {
@@ -46,20 +46,20 @@ class ImageListPresenter {
     _baseJson = await _repository.fetchFile();
   }
 
-  _exportAllPages() {
-    _repository.exportAllPages();
+  _exportAllFrames() {
+    _repository.exportAllFrames();
   }
 
-  String _getBaseImageIDFromBaseJson() {
+  String _getBaseFrameIdFromBaseJson() {
     return _baseJson.document.children.elementAt(0).prototypeStartNodeID;
   }
 
-  Future<String> _loadImageURL(String imageId) {
-    return _repository.fetchImageURL(imageId);
+  Future<String> _loadFrameUrl(String frameId) {
+    return _repository.fetchImageUrl(frameId);
   }
 
-  List<ActiveElement> _loadActiveElements(String imageId) {
-    return _repository.getActiveElements(imageId);
+  List<ActiveElement> _loadActiveElements(String frameId) {
+    return _repository.getActiveElements(frameId);
   }
 
 }

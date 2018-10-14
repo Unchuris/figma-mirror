@@ -1,4 +1,4 @@
-import 'package:figma_mirror/data/entities/image.dart';
+import 'package:figma_mirror/data/entities/fileResponse.dart';
 
 class ActiveElement {
 
@@ -6,15 +6,15 @@ class ActiveElement {
   final double y;
   final double width;
   final double height;
-  final String linkToNewImage;
-  final MyImage parent;
+  final String linkToNewFrame;
+  final Frame parent;
 
   ActiveElement(
       this.x,
       this.y,
       this.width,
       this.height,
-      this.linkToNewImage,
+      this.linkToNewFrame,
       this.parent,
   );
   

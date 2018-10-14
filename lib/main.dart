@@ -6,12 +6,12 @@ void main() {
   Injector.configure(Flavor.NETWORK);
 
   runApp(
-    new MaterialApp(
+    MaterialApp(
       title: 'Figma Mirror',
-      theme: new ThemeData(
+      theme: ThemeData(
         primarySwatch: Colors.blue
       ),
-      home: new HomePage()
+      home: HomePage()
     )
   );
 }

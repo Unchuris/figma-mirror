@@ -6,11 +6,11 @@ import 'package:figma_mirror/data/entities/fileResponse.dart';
 abstract class ScreenRepository {
   Future<FileResponse> fetchFile();
 
-  Future<String> fetchImageURL(String id);
+  Future<String> fetchImageUrl(String id);
 
-  List<ActiveElement> getActiveElements(String pageID);
+  List<ActiveElement> getActiveElements(String frameId);
 
-  void exportAllPages();
+  void exportAllFrames();
 }
 
 class FetchDataException implements Exception {
