@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:figma_mirror/data/entities/active_element.dart';
 import 'package:figma_mirror/data/entities/fileResponse.dart';
 import 'package:figma_mirror/data/repositories/screen_data.dart';
@@ -28,9 +26,11 @@ class ImageListPresenter {
       if (frameId == null) {
         frameId = _getBaseFrameIdFromBaseJson();
       }
-      String _frameUrl = await _loadFrameUrl(frameId);
+      String _frameUrl = _getFrameUrl(frameId);
       List<ActiveElement> _items = _loadActiveElements(frameId);
-      _view.onLoadScreenComplete(_frameUrl, _items);
+      if (_frameUrl != null && _items.isNotEmpty) {
+        _view.onLoadScreenComplete(_frameUrl, _items);
+      }
     } on FetchDataException catch(e) {
       _view.onLoadError(e.toString());
     }
@@ -38,7 +38,7 @@ class ImageListPresenter {
 
   _loadFileAndExportFrames() async {
     await _loadFile();
-    _exportAllFrames();
+    await _exportAllFrames();
   }
 
   _loadFile() async {
@@ -46,16 +46,16 @@ class ImageListPresenter {
     _baseJson = await _repository.fetchFile();
   }
 
-  _exportAllFrames() {
-    _repository.exportAllFrames();
+  _exportAllFrames() async {
+     await _repository.exportAllFrames();
   }
 
   String _getBaseFrameIdFromBaseJson() {
     return _baseJson.document.children.elementAt(0).prototypeStartNodeID;
   }
 
-  Future<String> _loadFrameUrl(String frameId) {
-    return _repository.fetchImageUrl(frameId);
+  String _getFrameUrl(String frameId) {
+    return _repository.getImageUrl(frameId);
   }
 
   List<ActiveElement> _loadActiveElements(String frameId) {

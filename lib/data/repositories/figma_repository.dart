@@ -21,6 +21,8 @@ class FigmaRepository implements ScreenRepository {
 
   final HashMap<String, Frame> _frameMap = HashMap();
 
+  final HashMap<String, String> _frameUrlMap = HashMap();
+
   FigmaRepository(this._figmaApi, this._authRepository);
 
   Future<FileResponse> fetchFile() async {
@@ -33,31 +35,44 @@ class FigmaRepository implements ScreenRepository {
     });
   }
 
-  Future<String> fetchImageUrl(String id) {
-    return _figmaApi.fetchImageUrl(
-      _authRepository.getToken(), 
-      _authRepository.getFileKey(),
-      id);
+  String getImageUrl(String frameId) {
+    return _frameUrlMap[frameId];
   }
 
   List<ActiveElement> getActiveElements(String frameId) {
     return _activeElementMap[frameId] == null ? List() : _activeElementMap[frameId];
   }
 
-  exportAllFrames() async {
+  Future<void> exportAllFrames() async {
     if (_baseJson == null) {
       _baseJson = await fetchFile();
     }
     for (Frame data in _baseJson.document.children.elementAt(0).children) {
-      if(data.id != null && data.type == _desiredItemType) {
-        _frameMap.putIfAbsent(data.id, () => data);
-        _activeElementMap.putIfAbsent(data.id, () => List<ActiveElement>());
-        _addAllActiveChildrenToTheMap(data);
+      String id = data.id;
+      if(id != null && data.type == _desiredItemType) {
+        _frameMap.putIfAbsent(id, () => data);
+        await _loadFrameUrlAndPutMap(id);
+        _activeElementMap.putIfAbsent(id, () => List<ActiveElement>());
+        _addAllActiveChildrenToMap(data);
       } 
     }
+    return; 
   }
 
-  _addAllActiveChildrenToTheMap(var frame) {
+  _loadFrameUrlAndPutMap(String frameId) async {
+    String frameUrl = await _fetchImageUrl(frameId);
+    _frameUrlMap.putIfAbsent(frameId, () => frameUrl);
+  }
+
+  Future<String> _fetchImageUrl(String id) async {
+    return await _figmaApi.fetchImageUrl(
+      _authRepository.getToken(), 
+      _authRepository.getFileKey(),
+      id,
+    );
+  }
+
+  _addAllActiveChildrenToMap(var frame) {
     for (var frameData in frame.children) {
       _setChildrenInMap(frameData.children, frame.id);
     }
