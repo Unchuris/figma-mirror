@@ -11,6 +11,8 @@ abstract class ScreenRepository {
   List<ActiveElement> getActiveElements(String frameId);
 
   Future<void> exportAllFrames();
+
+  String getPrototypeStartNodeID();
 }
 
 class FetchDataException implements Exception {

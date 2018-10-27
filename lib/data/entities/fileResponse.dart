@@ -76,6 +76,8 @@ class Frame extends Object {
   );
 
   factory Frame.fromJson(Map<String, dynamic> json) => _$FrameFromJson(json);
+
+  Map toJson() => _$FrameToJson(this);
 }
 
 @JsonSerializable()
@@ -97,6 +99,7 @@ class Element extends Object {
   );
 
   factory Element.fromJson(Map<String, dynamic> json) => _$ElementFromJson(json);
+  Map toJson() => _$ElementToJson(this);
 }
 
 @JsonSerializable()
@@ -114,4 +117,5 @@ class AbsoluteBoundingBox extends Object {
   );
 
   factory AbsoluteBoundingBox.fromJson(Map<String, dynamic> json) => _$AbsoluteBoundingBoxFromJson(json);
+  Map toJson() => _$AbsoluteBoundingBoxToJson(this);
 }

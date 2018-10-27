@@ -51,7 +51,7 @@ class ImageListPresenter {
   }
 
   String _getBaseFrameIdFromBaseJson() {
-    return _baseJson.document.children.elementAt(0).prototypeStartNodeID;
+    return _repository.getPrototypeStartNodeID();
   }
 
   String _getFrameUrl(String frameId) {
@@ -61,5 +61,4 @@ class ImageListPresenter {
   List<ActiveElement> _loadActiveElements(String frameId) {
     return _repository.getActiveElements(frameId);
   }
-
 }

@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
 
 import 'package:figma_mirror/data/datasource/remote/figma_api.dart';
 import 'package:figma_mirror/data/entities/active_element.dart';
 import 'package:figma_mirror/data/entities/fileResponse.dart';
 import 'package:figma_mirror/data/repositories/auth_repository.dart';
+import 'package:figma_mirror/data/repositories/file_name_utils.dart';
 import 'package:figma_mirror/data/repositories/screen_data.dart';
+import 'package:figma_mirror/utils/file_util.dart';
 
 class FigmaRepository implements ScreenRepository {
 
@@ -23,6 +26,8 @@ class FigmaRepository implements ScreenRepository {
 
   final HashMap<String, String> _frameUrlMap = HashMap();
 
+  String prototypeStartNodeID;
+
   FigmaRepository(this._figmaApi, this._authRepository);
 
   Future<FileResponse> fetchFile() async {
@@ -31,6 +36,7 @@ class FigmaRepository implements ScreenRepository {
       _authRepository.getFileKey()
     ).then((value) {
       _baseJson = value;
+      prototypeStartNodeID = _baseJson.document.children.elementAt(0).prototypeStartNodeID;
       return _baseJson;
     });
   }
@@ -56,6 +62,7 @@ class FigmaRepository implements ScreenRepository {
         _addAllActiveChildrenToMap(data);
       } 
     }
+    _saveData();
     return; 
   }
 
@@ -99,4 +106,13 @@ class FigmaRepository implements ScreenRepository {
     }
   }
 
+  String getPrototypeStartNodeID() {
+    return prototypeStartNodeID;
+  }
+
+  void _saveData() {
+    FileUtil.saveString(FileNameUtils.startNodeID, prototypeStartNodeID);
+    FileUtil.saveString(FileNameUtils.frameUrl, json.encode(_frameUrlMap));
+    FileUtil.saveString(FileNameUtils.activeElement, json.encode(_activeElementMap));
+  }
 }
