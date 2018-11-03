@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:figma_mirror/data/entities/active_element.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +32,8 @@ class ImagePage extends StatefulWidget {
   ImageListPresenter _presenter;
 
   String _imageUrl;
+
+  var _backgroundColor = Colors.transparent;
 
   List<ActiveElement> _activeElement = List();
 
@@ -80,23 +84,28 @@ class ImagePage extends StatefulWidget {
     } else {
       widget = Scaffold(
         body: Center(
-          child: Container (
-            child: LayoutBuilder(
-              builder: (_, constraints) =>
-                Container (
-                  constraints: _getBoxFitContainSize(constraints),
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: CachedNetworkImageProvider(_imageUrl),
-                        fit: BoxFit.fill,
+          child: GestureDetector(
+            onTap: () {
+              _highlightActiveElements();
+            },
+            child: Container (
+              child: LayoutBuilder(
+                builder: (_, constraints) =>
+                  Container (
+                    constraints: _getBoxFitContainSize(constraints),
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: CachedNetworkImageProvider(_imageUrl),
+                          fit: BoxFit.fill,
                       )
-                  ),
-                  child: LayoutBuilder(
-                  builder: (_, constraints) =>
-                    Stack(
-                      children: _drawElements(constraints)
+                    ),
+                    child: LayoutBuilder(
+                      builder: (_, constraints) =>
+                        Stack(
+                          children: _drawElements(constraints)
+                        )
                     )
-                )
+                  )
               )
             )
           )
@@ -106,6 +115,17 @@ class ImagePage extends StatefulWidget {
 
     return widget;
   }
+
+ _highlightActiveElements() {
+   setState(() {
+      _backgroundColor = Colors.blueAccent.withOpacity(0.5);
+    });
+    Timer(Duration(seconds: 1), () {
+        setState(() {
+          _backgroundColor = Colors.transparent;
+        });
+    });
+ }
 
  BoxConstraints _getBoxFitContainSize(BoxConstraints constraints) {
 
@@ -160,7 +180,7 @@ class ImagePage extends StatefulWidget {
           child: Container(
             width: item.width * widthFactor,
             height: item.height * heightFactor,
-            decoration: BoxDecoration(color: Colors.transparent,
+            decoration: BoxDecoration(color: _backgroundColor,
             ),
           )
         ),
