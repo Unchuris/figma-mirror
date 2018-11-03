@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:figma_mirror/data/entities/active_element.dart';
 import 'package:figma_mirror/data/entities/fileResponse.dart';
@@ -6,7 +7,7 @@ import 'package:figma_mirror/data/entities/fileResponse.dart';
 abstract class ScreenRepository {
   Future<FileResponse> fetchFile();
 
-  String getImageUrl(String id);
+  HashMap<String, String> getFrameUrlMap();
 
   List<ActiveElement> getActiveElements(String frameId);
 
@@ -23,5 +24,4 @@ class FetchDataException implements Exception {
   String toString() {
     return "$_message";
   }
-
 }

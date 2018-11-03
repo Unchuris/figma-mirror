@@ -41,8 +41,8 @@ class FigmaRepository implements ScreenRepository {
     });
   }
 
-  String getImageUrl(String frameId) {
-    return _frameUrlMap[frameId];
+  HashMap<String, String> getFrameUrlMap() {
+    return _frameUrlMap;
   }
 
   List<ActiveElement> getActiveElements(String frameId) {

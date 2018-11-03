@@ -11,5 +11,4 @@ class AuthRepository {
   String getFileKey() {
     return _fileKey;
   }
-
 }

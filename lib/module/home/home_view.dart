@@ -29,9 +29,11 @@ class ImagePage extends StatefulWidget {
 
  class _ImagePageState extends State<ImagePage> implements ScreenListViewContract {
 
+  Timer _timer;
+
   ImageListPresenter _presenter;
 
-  String _imageUrl;
+  CachedNetworkImageProvider _image;
 
   var _backgroundColor = Colors.transparent;
 
@@ -50,13 +52,19 @@ class ImagePage extends StatefulWidget {
     super.initState();
     _isLoading = true;
     _isError = false;
-    _presenter.loadScreen(null);
+    _presenter.loadAllScreen();
   }
 
   @override
-  void onLoadScreenComplete(String imageUrl, List<ActiveElement> items) {
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  void onLoadScreenComplete(CachedNetworkImageProvider image, List<ActiveElement> items) {
     setState(() {
-      _imageUrl = imageUrl;
+      _image = image;
       _activeElement = items;
       _isLoading = false;
     });
@@ -68,6 +76,13 @@ class ImagePage extends StatefulWidget {
       _isError = true;
       textUntilTheScreenIsLoaded = "Load Failed.\n" + e;
     });
+  }
+
+  @override
+  void cacheImages(List<String> _imageUrl) {
+    _imageUrl.forEach( (imageUrl) => 
+      CachedNetworkImageProvider(imageUrl)
+    );
   }
 
   @override
@@ -95,8 +110,8 @@ class ImagePage extends StatefulWidget {
                     constraints: _getBoxFitContainSize(constraints),
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: CachedNetworkImageProvider(_imageUrl),
-                          fit: BoxFit.fill,
+                        image: _image,
+                        fit: BoxFit.fill,
                       )
                     ),
                     child: LayoutBuilder(
@@ -120,7 +135,7 @@ class ImagePage extends StatefulWidget {
    setState(() {
       _backgroundColor = Colors.blueAccent.withOpacity(0.5);
     });
-    Timer(Duration(seconds: 1), () {
+    _timer = Timer(Duration(seconds: 1), () {
         setState(() {
           _backgroundColor = Colors.transparent;
         });
@@ -191,12 +206,6 @@ class ImagePage extends StatefulWidget {
   }
 
   _updateScreen(String frameId) {
-
-    setState(() {
-      _isLoading = true;
-    });
-
     _presenter.loadScreen(frameId);
   }
-
- }
+}

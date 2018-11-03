@@ -27,10 +27,8 @@ class Injector {
   ScreenRepository get screenRepository {
     if (_flavor == Flavor.NETWORK) {
       return FigmaRepository(FigmaAPI(Client()), AuthRepository());
-    }
-    if (_flavor == Flavor.LOCAL) {
+    } else {
       return LocalRepository();
     }
   }
-
 }

@@ -49,8 +49,8 @@ class LocalRepository implements ScreenRepository {
   }
 
   @override
-  String getImageUrl(String frameId) {
-    return _frameUrlMap[frameId];
+  HashMap<String, String> getFrameUrlMap() {
+    return _frameUrlMap;
   }
 
   @override

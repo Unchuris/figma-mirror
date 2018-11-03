@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:collection';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:figma_mirror/data/entities/active_element.dart';
 import 'package:figma_mirror/data/entities/fileResponse.dart';
 import 'package:figma_mirror/data/repositories/screen_data.dart';
@@ -5,7 +9,11 @@ import 'package:figma_mirror/data/repositories/screen_data.dart';
 import '../../injection/di.dart';
 
 abstract class ScreenListViewContract {
-  void onLoadScreenComplete(String frameUrl, List<ActiveElement> items);
+  void cacheImages(List<String> imageUrl);
+  void onLoadScreenComplete(
+    CachedNetworkImageProvider frameUrl, 
+    List<ActiveElement> items
+  );
   void onLoadError(String error);
 }
 
@@ -13,23 +21,41 @@ class ImageListPresenter {
   ScreenListViewContract _view;
   ScreenRepository _repository;
   FileResponse _baseJson;
+  HashMap<String, String> _frameUrlMap = HashMap();
+  HashMap<String, CachedNetworkImageProvider> _images = HashMap();
 
   ImageListPresenter(this._view)  {
     _repository = Injector().screenRepository;
   }
 
-  loadScreen(String frameId) async {
+  loadAllScreen() async {
     try {
       if (_baseJson == null) {
         await _loadFileAndExportFrames();
       }
-      if (frameId == null) {
-        frameId = _getBaseFrameIdFromBaseJson();
+      _frameUrlMap = _repository.getFrameUrlMap();
+      _cacheImages();
+      var _frames = _frameUrlMap.keys.toList();
+      for (var frameId in _frames) {
+        var _items = _loadActiveElements(frameId);
+        var _frame = _getImageProvider(frameId);
+        if (_frame != null) {
+          _view.onLoadScreenComplete(_frame, _items);
+          await Future.delayed((Duration(seconds: 1)));
+        }
       }
-      String _frameUrl = _getFrameUrl(frameId);
+      loadScreen(_getBaseFrameIdFromBaseJson());
+    } on FetchDataException catch(e) {
+      _view.onLoadError(e.toString());
+    }
+  }
+
+  loadScreen(String frameId) async {
+    try {
+      var _frame = _getImageProvider(frameId);
       List<ActiveElement> _items = _loadActiveElements(frameId);
-      if (_frameUrl != null && _items.isNotEmpty) {
-        _view.onLoadScreenComplete(_frameUrl, _items);
+      if (_frame != null) {
+        _view.onLoadScreenComplete(_frame, _items);
       }
     } on FetchDataException catch(e) {
       _view.onLoadError(e.toString());
@@ -54,11 +80,22 @@ class ImageListPresenter {
     return _repository.getPrototypeStartNodeID();
   }
 
-  String _getFrameUrl(String frameId) {
-    return _repository.getImageUrl(frameId);
+  CachedNetworkImageProvider _getImageProvider(String frameId) {
+    return _images[getImageUrl(frameId)];
+  }
+
+  String getImageUrl(String frameId) {
+    return _frameUrlMap[frameId];
   }
 
   List<ActiveElement> _loadActiveElements(String frameId) {
     return _repository.getActiveElements(frameId);
+  }
+
+  void _cacheImages() {
+    List<String> _imageUrl = _frameUrlMap.values.toList();
+    _imageUrl.forEach( (imageUrl) => 
+      _images.putIfAbsent(imageUrl, () => CachedNetworkImageProvider(imageUrl))
+    );
   }
 }
