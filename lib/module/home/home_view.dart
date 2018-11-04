@@ -43,6 +43,8 @@ class ImagePage extends StatefulWidget {
 
   bool _isLoading, _isError;
 
+  var _stubColor = Colors.white;
+
   _ImagePageState() {
     _presenter = ImageListPresenter(this);
   }
@@ -86,8 +88,14 @@ class ImagePage extends StatefulWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  void setVisibleStub(bool isVisible) {
+    setState(() {
+      _stubColor = isVisible ? Colors.white : Colors.transparent;
+    });
+  }
 
+  @override
+  Widget build(BuildContext context) {
     var widget;
 
     if(_isLoading) {
@@ -98,33 +106,33 @@ class ImagePage extends StatefulWidget {
       );
     } else {
       widget = Scaffold(
-        body: Center(
-          child: GestureDetector(
-            onTap: () {
-              _highlightActiveElements();
-            },
-            child: Container (
-              child: LayoutBuilder(
-                builder: (_, constraints) =>
-                  Container (
-                    constraints: _getBoxFitContainSize(constraints),
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: _image,
-                        fit: BoxFit.fill,
-                      )
-                    ),
-                    child: LayoutBuilder(
-                      builder: (_, constraints) =>
-                        Stack(
-                          children: _drawElements(constraints)
+          body: Center(
+            child: GestureDetector(
+              onTap: () {
+                _highlightActiveElements();
+              },
+              child: Container (
+                child: LayoutBuilder(
+                  builder: (_, constraints) =>
+                    Container (
+                      constraints: _getBoxFitContainSize(constraints),
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: _image,
+                          fit: BoxFit.fill,
                         )
+                      ),
+                      child: LayoutBuilder(
+                        builder: (_, constraints) =>
+                          Stack(
+                            children: _drawElements(constraints)
+                          )
+                      )
                     )
-                  )
+                )
               )
             )
           )
-        )
       );
     }
 
@@ -174,7 +182,18 @@ class ImagePage extends StatefulWidget {
 
   List<Widget> _drawElements(BoxConstraints constraints) {
 
-    var activeElement = <Widget>[];
+    var activeElement = <Widget>[
+      Positioned(
+        left: 0.0,
+        top: 0.0,
+        child: Container(
+            width: constraints.maxWidth,
+            height: constraints.maxHeight,
+            decoration: BoxDecoration(color: _stubColor,
+            ),
+          ),
+      )
+    ];
 
     if (_activeElement.isEmpty) return activeElement;
 

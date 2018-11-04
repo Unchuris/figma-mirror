@@ -15,6 +15,7 @@ abstract class ScreenListViewContract {
     List<ActiveElement> items
   );
   void onLoadError(String error);
+  void setVisibleStub(bool isVisible);
 }
 
 class ImageListPresenter {
@@ -45,6 +46,7 @@ class ImageListPresenter {
         }
       }
       loadScreen(_getBaseFrameIdFromBaseJson());
+      _view.setVisibleStub(false);
     } on FetchDataException catch(e) {
       _view.onLoadError(e.toString());
     }
