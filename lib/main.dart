@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:figma_mirror/data/repositories/file_name_utils.dart';
+import 'package:figma_mirror/home.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'module/home/home_view.dart';
@@ -22,9 +23,9 @@ void main() async {
     MaterialApp(
       title: 'Figma Mirror',
       theme: ThemeData(
-        primarySwatch: Colors.blue
+        backgroundColor: Colors.white
       ),
-      home: HomePage()
+      home: AuthorizationView()
     )
   );
 }
