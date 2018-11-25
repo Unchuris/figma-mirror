@@ -3,6 +3,7 @@ import 'dart:collection';
 
 import 'package:figma_mirror/data/entities/active_element.dart';
 import 'package:figma_mirror/data/entities/fileResponse.dart';
+import 'package:figma_mirror/data/entities/filesResponse.dart';
 
 abstract class ScreenRepository {
   Future<FileResponse> fetchFile();
@@ -14,6 +15,10 @@ abstract class ScreenRepository {
   Future<void> exportAllFrames();
 
   String getPrototypeStartNodeID();
+}
+
+abstract class HomeRepository {
+  Future<FilesResponse> fetchAllFiles(String _token);
 }
 
 class FetchDataException implements Exception {

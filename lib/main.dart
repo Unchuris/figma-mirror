@@ -1,10 +1,9 @@
 import 'dart:io';
 
 import 'package:figma_mirror/data/repositories/file_name_utils.dart';
-import 'package:figma_mirror/home.dart';
+import 'package:figma_mirror/module/home/home_view.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-import 'module/home/home_view.dart';
 import 'injection/di.dart';
 
 void main() async {
@@ -25,7 +24,7 @@ void main() async {
       theme: ThemeData(
         backgroundColor: Colors.white
       ),
-      home: AuthorizationView()
+      home: HomePage()
     )
   );
 }

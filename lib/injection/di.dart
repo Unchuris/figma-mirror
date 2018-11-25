@@ -1,6 +1,8 @@
 import 'package:figma_mirror/data/datasource/remote/figma_api.dart';
+import 'package:figma_mirror/data/datasource/remote/figma_base_api.dart';
 import 'package:figma_mirror/data/repositories/auth_repository.dart';
 import 'package:figma_mirror/data/repositories/figma_repository.dart';
+import 'package:figma_mirror/data/repositories/figma_repository_api.dart';
 import 'package:figma_mirror/data/repositories/local_repository.dart';
 import 'package:figma_mirror/data/repositories/screen_data.dart';
 import 'package:http/http.dart';
@@ -26,9 +28,13 @@ class Injector {
 
   ScreenRepository get screenRepository {
     if (_flavor == Flavor.NETWORK) {
-      return FigmaRepository(FigmaAPI(Client()), AuthRepository());
+      return FigmaRepositoryApi(FigmaAPI(Client()), AuthRepository());
     } else {
       return LocalRepository();
     }
+  }
+
+  HomeRepository get homeRepository {
+    return FigmaRepository(FigmaBaseApi(Client()));
   }
 }

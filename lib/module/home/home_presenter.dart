@@ -1,103 +1,58 @@
-import 'dart:async';
-import 'dart:collection';
-
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:figma_mirror/data/entities/active_element.dart';
-import 'package:figma_mirror/data/entities/fileResponse.dart';
+import 'package:figma_mirror/data/entities/filesResponse.dart';
 import 'package:figma_mirror/data/repositories/screen_data.dart';
+import 'package:figma_mirror/injection/di.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:figma_mirror/oAuth/flutter_auth.dart';
+import 'package:figma_mirror/oAuth/model/config.dart';
+import 'package:figma_mirror/oAuth/oauth.dart';
+import 'package:figma_mirror/oAuth/token.dart';
 
-import '../../injection/di.dart';
-
-abstract class ScreenListViewContract {
-  void cacheImages(List<String> imageUrl);
-  void onLoadScreenComplete(
-    CachedNetworkImageProvider frameUrl, 
-    List<ActiveElement> items
-  );
-  void onLoadError(String error);
-  void setVisibleStub(bool isVisible);
+abstract class HomeContract {
+  void initListView(List<File> files);
 }
 
-class ImageListPresenter {
-  ScreenListViewContract _view;
-  ScreenRepository _repository;
-  FileResponse _baseJson;
-  HashMap<String, String> _frameUrlMap = HashMap();
-  HashMap<String, CachedNetworkImageProvider> _images = HashMap();
+class HomePresenter {
+  FilesResponse _files;
+  HomeRepository _repository;
+  HomeContract _view;
+  SharedPreferences _prefs;
+  String _token;
+  String _key = "TOKEN";
+  Map<String, String> _customParameters = {
+    "state": "file_read",
+    "scope": "23134"
+  };
 
-  ImageListPresenter(this._view)  {
-    _repository = Injector().screenRepository;
+  HomePresenter(this._view) {
+    _repository = Injector().homeRepository;
   }
 
-  loadAllScreen() async {
-    try {
-      if (_baseJson == null) {
-        await _loadFileAndExportFrames();
-      }
-      _frameUrlMap = _repository.getFrameUrlMap();
-      _cacheImages();
-      var _frames = _frameUrlMap.keys.toList();
-      for (var frameId in _frames) {
-        var _items = _loadActiveElements(frameId);
-        var _frame = _getImageProvider(frameId);
-        if (_frame != null) {
-          _view.onLoadScreenComplete(_frame, _items);
-          await Future.delayed((Duration(seconds: 1)));
-        }
-      }
-      loadScreen(_getBaseFrameIdFromBaseJson());
-      _view.setVisibleStub(false);
-    } on FetchDataException catch(e) {
-      _view.onLoadError(e.toString());
+  void init() async {
+    _prefs = await SharedPreferences.getInstance();
+    if (_prefs.getString(_key) == null) {
+      await _authorization();
     }
+    _token = _prefs.getString(_key);
+    await _loadAllProjects();
   }
 
-  loadScreen(String frameId) async {
-    try {
-      var _frame = _getImageProvider(frameId);
-      List<ActiveElement> _items = _loadActiveElements(frameId);
-      if (_frame != null) {
-        _view.onLoadScreenComplete(_frame, _items);
-      }
-    } on FetchDataException catch(e) {
-      _view.onLoadError(e.toString());
-    }
+  _loadAllProjects() async {
+    _files = await _repository.fetchAllFiles(_token);
+    _view.initListView(_files.meta.files);
   }
 
-  _loadFileAndExportFrames() async {
-    await _loadFile();
-    await _exportAllFrames();
-  }
-
-  _loadFile() async {
-    if (_view == null) return;
-    _baseJson = await _repository.fetchFile();
-  }
-
-  _exportAllFrames() async {
-     await _repository.exportAllFrames();
-  }
-
-  String _getBaseFrameIdFromBaseJson() {
-    return _repository.getPrototypeStartNodeID();
-  }
-
-  CachedNetworkImageProvider _getImageProvider(String frameId) {
-    return _images[getImageUrl(frameId)];
-  }
-
-  String getImageUrl(String frameId) {
-    return _frameUrlMap[frameId];
-  }
-
-  List<ActiveElement> _loadActiveElements(String frameId) {
-    return _repository.getActiveElements(frameId);
-  }
-
-  void _cacheImages() {
-    List<String> _imageUrl = _frameUrlMap.values.toList();
-    _imageUrl.forEach( (imageUrl) => 
-      _images.putIfAbsent(imageUrl, () => CachedNetworkImageProvider(imageUrl))
+  _authorization() async {
+    final OAuth flutterOAuth = FlutterOAuth(
+      Config(
+          "https://www.figma.com/oauth",
+          "https://www.figma.com/api/oauth/token",
+          "kZIYbxnxZ2emZnnxlhXx1M",
+          "n7lJJ4mRZR9YtoAMk0xqdHH6WMwDBA",
+          "http://localhost:8080",
+          "code",
+          parameters: _customParameters),
     );
+    Token token = await flutterOAuth.performAuthorization();
+    _prefs.setString(_key, token.accessToken);
   }
 }
