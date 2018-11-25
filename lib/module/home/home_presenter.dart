@@ -1,6 +1,9 @@
 import 'package:figma_mirror/data/entities/filesResponse.dart';
+import 'package:figma_mirror/data/repositories/auth_repository.dart';
 import 'package:figma_mirror/data/repositories/screen_data.dart';
 import 'package:figma_mirror/injection/di.dart';
+import 'package:figma_mirror/module/frame/frame_view.dart';
+import 'package:figma_mirror/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:figma_mirror/oAuth/flutter_auth.dart';
 import 'package:figma_mirror/oAuth/model/config.dart';
@@ -9,6 +12,8 @@ import 'package:figma_mirror/oAuth/token.dart';
 
 abstract class HomeContract {
   void initListView(List<File> files);
+
+  void openScreen(Object screen);
 }
 
 class HomePresenter {
@@ -36,10 +41,17 @@ class HomePresenter {
     await _loadAllProjects();
   }
 
-  _loadAllProjects() async {
-    _files = await _repository.fetchAllFiles(_token);
-    _view.initListView(_files.meta.files);
+  onSubmitted(String str) async {
+    var auth = AuthRepository(_token, str);
+    if (await FileUtil.checkForExists(str)) {
+      Injector.configure(Flavor.LOCAL, auth);
+    } else {
+      Injector.configure(Flavor.NETWORK, auth);
+    }
+    _view.openScreen(FramePage());
   }
+
+  _loadAllProjects() async {}
 
   _authorization() async {
     final OAuth flutterOAuth = FlutterOAuth(

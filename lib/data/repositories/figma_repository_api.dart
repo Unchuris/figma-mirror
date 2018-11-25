@@ -11,7 +11,6 @@ import 'package:figma_mirror/data/repositories/screen_data.dart';
 import 'package:figma_mirror/utils/file_util.dart';
 
 class FigmaRepositoryApi implements ScreenRepository {
-
   final String _desiredItemType = "FRAME";
 
   FigmaAPI _figmaApi;
@@ -31,12 +30,12 @@ class FigmaRepositoryApi implements ScreenRepository {
   FigmaRepositoryApi(this._figmaApi, this._authRepository);
 
   Future<FileResponse> fetchFile() async {
-    return await _figmaApi.fetchFile(
-      _authRepository.getToken(), 
-      _authRepository.getFileKey()
-    ).then((value) {
+    return await _figmaApi
+        .fetchFile(_authRepository.getToken(), _authRepository.getFileKey())
+        .then((value) {
       _baseJson = value;
-      prototypeStartNodeID = _baseJson.document.children.elementAt(0).prototypeStartNodeID;
+      prototypeStartNodeID =
+          _baseJson.document.children.elementAt(0).prototypeStartNodeID;
       return _baseJson;
     });
   }
@@ -46,7 +45,9 @@ class FigmaRepositoryApi implements ScreenRepository {
   }
 
   List<ActiveElement> getActiveElements(String frameId) {
-    return _activeElementMap[frameId] == null ? List() : _activeElementMap[frameId];
+    return _activeElementMap[frameId] == null
+        ? List()
+        : _activeElementMap[frameId];
   }
 
   Future<void> exportAllFrames() async {
@@ -55,15 +56,15 @@ class FigmaRepositoryApi implements ScreenRepository {
     }
     for (Frame data in _baseJson.document.children.elementAt(0).children) {
       String id = data.id;
-      if(id != null && data.type == _desiredItemType) {
+      if (id != null && data.type == _desiredItemType) {
         _frameMap.putIfAbsent(id, () => data);
         await _loadFrameUrlAndPutMap(id);
         _activeElementMap.putIfAbsent(id, () => List<ActiveElement>());
         _addAllActiveChildrenToMap(data);
-      } 
+      }
     }
     _saveData();
-    return; 
+    return;
   }
 
   _loadFrameUrlAndPutMap(String frameId) async {
@@ -73,7 +74,7 @@ class FigmaRepositoryApi implements ScreenRepository {
 
   Future<String> _fetchImageUrl(String id) async {
     return await _figmaApi.fetchImageUrl(
-      _authRepository.getToken(), 
+      _authRepository.getToken(),
       _authRepository.getFileKey(),
       id,
     );
@@ -87,7 +88,7 @@ class FigmaRepositoryApi implements ScreenRepository {
 
   _setChildrenInMap(List<Element> children, String id) {
     if (children == null || children.isEmpty) return;
-    
+
     for (Element c in children) {
       if (c.transitionNodeID == null) {
         if (c.children != null) {
@@ -95,12 +96,12 @@ class FigmaRepositoryApi implements ScreenRepository {
         }
       } else {
         ActiveElement activeElement = ActiveElement(
-          c.absoluteBoundingBox.x,
-          c.absoluteBoundingBox.y,
-          c.absoluteBoundingBox.width, 
-          c.absoluteBoundingBox.height, 
-          c.transitionNodeID, 
-          _frameMap[id]);
+            c.absoluteBoundingBox.x,
+            c.absoluteBoundingBox.y,
+            c.absoluteBoundingBox.width,
+            c.absoluteBoundingBox.height,
+            c.transitionNodeID,
+            _frameMap[id]);
         _activeElementMap[id].add(activeElement);
       }
     }
@@ -111,8 +112,12 @@ class FigmaRepositoryApi implements ScreenRepository {
   }
 
   void _saveData() {
-    FileUtil.saveString(FileNameUtils.startNodeID, prototypeStartNodeID);
-    FileUtil.saveString(FileNameUtils.frameUrl, json.encode(_frameUrlMap));
-    FileUtil.saveString(FileNameUtils.activeElement, json.encode(_activeElementMap));
+    var fileKey = _authRepository.getFileKey();
+    FileUtil.saveString(
+        fileKey, FileNameUtils.startNodeID, prototypeStartNodeID);
+    FileUtil.saveString(
+        fileKey, FileNameUtils.frameUrl, json.encode(_frameUrlMap));
+    FileUtil.saveString(
+        fileKey, FileNameUtils.activeElement, json.encode(_activeElementMap));
   }
 }

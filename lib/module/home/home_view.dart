@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setEnabledSystemUIOverlays([]);
     return Scaffold(body: Main());
   }
 }
@@ -19,7 +18,8 @@ class Main extends StatefulWidget {
 
 class MainState extends State<Main> implements HomeContract {
   HomePresenter _presenter;
-  List<File> _files;
+  List<File> _files = List();
+  final TextEditingController _controller = new TextEditingController();
 
   MainState() {
     _presenter = HomePresenter(this);
@@ -39,8 +39,46 @@ class MainState extends State<Main> implements HomeContract {
   }
 
   @override
+  void openScreen(Object screen) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => screen),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Center(
-        child: Text(_files.toString()));
+    return Container(
+      padding: EdgeInsets.all(10.0),
+      child: Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            TextField(
+              decoration: new InputDecoration(hintText: "Enter text here..."),
+              onSubmitted: (String str) {
+                setState(() {
+                  _controller.text = "";
+                });
+                _presenter.onSubmitted(str);
+              },
+              controller: _controller,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  getHomePageBody(BuildContext context) {
+    return ListView.builder(
+      itemCount: _files.length,
+      itemBuilder: _getItemUI,
+      padding: EdgeInsets.all(0.0),
+    );
+  }
+
+  Widget _getItemUI(BuildContext context, int index) {
+    return Text(_files[index].name);
   }
 }

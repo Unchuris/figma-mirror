@@ -8,33 +8,37 @@ import 'package:figma_mirror/data/repositories/screen_data.dart';
 import 'package:figma_mirror/utils/file_util.dart';
 
 class LocalRepository implements ScreenRepository {
-
   HashMap<String, List<ActiveElement>> _activeElementMap = HashMap();
 
   HashMap<String, String> _frameUrlMap;
 
   String prototypeStartNodeID;
 
-  LocalRepository();
+  String _fileKey;
+
+  LocalRepository(this._fileKey);
 
   @override
   Future<void> exportAllFrames() async {
-    prototypeStartNodeID = await FileUtil.loadString(FileNameUtils.startNodeID);
-    String activeElement = await FileUtil.loadString(FileNameUtils.activeElement);
-    HashMap<String, dynamic> parsedJson = HashMap<String, dynamic>.from(json.decode(activeElement));
+    prototypeStartNodeID =
+        await FileUtil.loadString(_fileKey, FileNameUtils.startNodeID);
+    String activeElement =
+        await FileUtil.loadString(_fileKey, FileNameUtils.activeElement);
+    HashMap<String, dynamic> parsedJson =
+        HashMap<String, dynamic>.from(json.decode(activeElement));
 
     List<ActiveElement> activeElementList = List();
     parsedJson.forEach((key, value) {
       value.forEach((element) {
-          ActiveElement el = ActiveElement.fromJson(element);
-          activeElementList.add(el);
-        }
-      );
+        ActiveElement el = ActiveElement.fromJson(element);
+        activeElementList.add(el);
+      });
       _activeElementMap.putIfAbsent(key, () => activeElementList);
       activeElementList = List();
     });
 
-    String frameUrl = await FileUtil.loadString(FileNameUtils.frameUrl);
+    String frameUrl =
+        await FileUtil.loadString(_fileKey, FileNameUtils.frameUrl);
     _frameUrlMap = HashMap<String, String>.from(json.decode(frameUrl));
   }
 
@@ -45,7 +49,9 @@ class LocalRepository implements ScreenRepository {
 
   @override
   List<ActiveElement> getActiveElements(String frameId) {
-    return _activeElementMap[frameId] == null ? List() : _activeElementMap[frameId];
+    return _activeElementMap[frameId] == null
+        ? List()
+        : _activeElementMap[frameId];
   }
 
   @override

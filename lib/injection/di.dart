@@ -15,9 +15,11 @@ enum Flavor {
 class Injector {
   static final Injector _singleton = Injector._internal();
   static Flavor _flavor;
+  static AuthRepository _authRepository;
 
-  static void configure(Flavor flavor) {
+  static void configure(Flavor flavor, AuthRepository authRepository) {
     _flavor = flavor;
+    _authRepository = authRepository;
   }
 
   factory Injector() {
@@ -28,9 +30,9 @@ class Injector {
 
   ScreenRepository get screenRepository {
     if (_flavor == Flavor.NETWORK) {
-      return FigmaRepositoryApi(FigmaAPI(Client()), AuthRepository());
+      return FigmaRepositoryApi(FigmaAPI(Client()), _authRepository);
     } else {
-      return LocalRepository();
+      return LocalRepository(_authRepository.getFileKey());
     }
   }
 
