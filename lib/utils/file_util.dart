@@ -33,10 +33,7 @@ class FileUtil {
     File activeElement = File('${directory.path}/$token${FileNameUtils.activeElement}');
     File frameUrl = File('${directory.path}/$token${FileNameUtils.frameUrl}');
     File startNodeID = File('${directory.path}/$token${FileNameUtils.startNodeID}');
-    if (await activeElement.exists() && await frameUrl.exists() && await startNodeID.exists()) {
-      return true;
-    } else {
-      return false;
-    }
+    return (await activeElement.exists() && await frameUrl.exists()
+        && await startNodeID.exists());
   }
 }
