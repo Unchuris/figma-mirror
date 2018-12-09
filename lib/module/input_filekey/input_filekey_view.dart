@@ -1,6 +1,7 @@
 import 'package:figma_mirror/module/input_filekey/input_filekey_presenter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class InputPage extends StatelessWidget {
   @override
@@ -15,12 +16,26 @@ class FileKey extends StatefulWidget {
 }
 
 class FileKeyState extends State<FileKey> implements InputFileKeyContract {
+  String fileKey = "";
   InputFileKeyPresenter _presenter;
   final TextEditingController _controller = new TextEditingController();
   String _errorText = "";
 
   FileKeyState() {
     _presenter = InputFileKeyPresenter(this);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _presenter.init();
+  }
+
+  @override
+  void initInputText(String text) {
+    setState(() {
+      _controller.text = text;
+    });
   }
 
   @override
@@ -57,9 +72,6 @@ class FileKeyState extends State<FileKey> implements InputFileKeyContract {
         labelText: "File key",
       ),
       onSubmitted: (String str) {
-        setState(() {
-          _controller.text = "";
-        });
         _presenter.onSubmitted(str);
       },
       controller: _controller,
