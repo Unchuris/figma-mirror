@@ -1,4 +1,4 @@
-import 'package:figma_mirror/module/home/home_view.dart';
+import 'package:figma_mirror/module/input_filekey/input_filekey_view.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
@@ -8,5 +8,5 @@ void main() async {
           backgroundColor: Colors.white,
           canvasColor: Colors.white
       ),
-      home: HomePage()));
+      home: InputPage()));
 }

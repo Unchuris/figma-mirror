@@ -36,7 +36,7 @@ class FigmaAPI {
   Future<String> _getHttpResponse(String authToken, String url) async {
     return await http.get(url,
       headers: {
-        "Authorization": "Bearer $authToken",
+        "X-FIGMA-TOKEN": authToken,
       })
       .then((Response response) {
         final String jsonBody = response.body;

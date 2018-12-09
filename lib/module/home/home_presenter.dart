@@ -18,7 +18,6 @@ abstract class HomeContract {
 
 class HomePresenter {
   FilesResponse _files;
-  HomeRepository _repository;
   HomeContract _view;
   SharedPreferences _prefs;
   String _token;
@@ -28,9 +27,7 @@ class HomePresenter {
     "scope": "23134"
   };
 
-  HomePresenter(this._view) {
-    _repository = Injector().homeRepository;
-  }
+  HomePresenter(this._view);
 
   void init() async {
     _prefs = await SharedPreferences.getInstance();
